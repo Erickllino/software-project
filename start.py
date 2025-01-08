@@ -16,7 +16,7 @@ register(
     entry_point="sslenv:SSLExampleEnv"
 )
 
-env = gym.make("SSL-Project", difficulty=Difficulty(args.difficulty))
+env = gym.make("SSL-Project", difficulty=Difficulty(1))#(args.difficulty))
 
 env.reset()
 

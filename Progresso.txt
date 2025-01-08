@@ -1,0 +1,38 @@
+1a Dificuldade  - trabalhar com o github --> dar fork no repositório
+
+2a              - Baixar os requisitos, provavelmente dando problema devido a partição da minha maquina
+
+pip._vendor.urllib3.exceptions.ProtocolError: ("Connection broken: OSError(28, 'No space left on device')", OSError(28, 'No space left on device'))
+
+Tive problemas para organização do espaço para o trabalho, solução --> criei um ambinte virtual conda na pasta do projeto, nao tem espaço no anaconda do linux em si
+
+3a              - Dificuldade com a utilização do linux, devido a falta de intimidade com o OS
+
+
+
+
+Tendo o projeto funcionando em maos, agora penso em como resolver esses problemas:
+Dificuldade 1 --> Parece, de fato, o mais facil. O agente somente deve se movimentar afim de desviar de cada obstaculo
+Dificuldade 2 --> Os obstaculos se movem, oque pode dificultar o algoritmo para como o 
+Dificuldade 3 --> Aqui tem-se multiplos agentes, mas eles estao todos indo para o mesmo objetivo, a optimização desse movimento pode vim a partir da separaçao de
+qual agente vai para qual objetivo
+
+Dificuldade 4 --> Aqui tem-se multiplos agentes, como na Dificuldade 3, entretanto, aqui se tem menos objetivos. provavelmente deve-se deixar os agentes mais distantes
+dos objetivo em posiçoes estratetigicas, para que esses fiquem mais proximos dos objetivos
+
+
+
+           ## Dificuldade 1 
+
+Lendo os arquivo, fico em duvida em como eu começo, minha ideia inicial é passar a distancia relativa do player e todos os obstaculos e se ele ficarem à uma distancia
+a se colidirem, altero o trajeto aplicando algum algoritimo de procura (talvez depth first search)
+
+-- Estou tendo dificuldade em puxar a posiçoes de cada obstaculo
+
+Erro extremamente besta, que me levou a perder bastate tempo, a variavel self.opponents estava puxando as posiçoes de todos, para pegar a posiçâo basta fazer:
+self.opponents[id].x ou self.opponents[id].y ---- Uso 'id' pois é um dicionario oordenado
+
+Agora que ja matei esse leao, agora irei pensar mais no algoritimo a ser usado. Atualmente estou fazendo ele ir diretamente para o alvo em uma reta e se ele encontrar
+um obstaculo, move de forma aleatoria
+
+Referência: https://fei.edu.br/robofei/ics/IC-Leonardo-2020.pdf

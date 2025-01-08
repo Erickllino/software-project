@@ -189,5 +189,6 @@ class SSLExampleEnv(SSLBaseEnv):
 
     def draw_target(self, screen, transformer, point, color):
         x, y = transformer(point.x, point.y)
+       #print('test')
         size = 0.09 * self.field_renderer.scale
         pygame.draw.circle(screen, color, (x, y), size, 2)
