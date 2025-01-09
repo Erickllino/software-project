@@ -1,10 +1,7 @@
+import heapq
 from utils.ssl.Navigation import Navigation
 from utils.ssl.base_agent import BaseAgent
 from utils.Point import Point
-from collections import deque
-import heapq
-
-import random
 
 class ExampleAgent(BaseAgent):
 
@@ -12,122 +9,122 @@ class ExampleAgent(BaseAgent):
         super().__init__(id, yellow)
 
     def decision(self):
-        global n
-
+        # Verifica se existem alvos
         if len(self.targets) == 0:
             return
 
+        # Obtém posições dos oponentes
+        opponent_position = [(op.x, op.y) for op in self.opponents.values()]
 
-        # self.teammates é a lista de agentes
-        # self.opponents é a lista dos oponentes
+        # Verifica se há obstáculos perto da posição atual
+        obs = self.is_near_opponent(self.pos, opponent_position, max_distance=0.25)
 
-        
-        obs = self.detect_obstacles()
-        if not obs:
+        if not obs:  # Se não houver obstáculos
+            # Move diretamente ao alvo
             target_velocity, target_angle_velocity = Navigation.goToPoint(self.robot, self.targets[0])
-            
         else:
-            nada  =Point(100, 100)
+            # Usa A* para encontrar um caminho
             start = (self.robot.x, self.robot.y)
             goal = (self.targets[0].x, self.targets[0].y)
-            path = self.a_star(start, goal, self.opponents)
-            if path:
-                next_point = path[1]  # Próximo ponto no caminho
-                target_velocity, target_angle_velocity = Navigation.goToPoint(self.robot, Point(next_point[0], next_point[1]))
+            print('Antes de bater no algo')
+            path = self.a_star(start, goal, opponent_position)
+
+            if path is not None:
+                for point in path:
+                    # Move o robô ponto a ponto no caminho
+                    target_velocity, target_angle_velocity = Navigation.goToPoint(self.robot, Point(point[0], point[1]))
+                    self.set_vel(target_velocity)
+                    self.set_angle_vel(target_angle_velocity)
             else:
-                target_velocity, target_angle_velocity = 0, 0  # Parar se não houver caminho
-            #arget_velocity, target_angle_velocity = Navigation.goToPoint(self.robot,nada)  # Parar se não houver caminho
-            
-        
+                # Caso não exista caminho, para o robô
+                self.set_vel(0)
+                self.set_angle_vel(0)
+                return
+
+        # Define a velocidade final
         self.set_vel(target_velocity)
         self.set_angle_vel(target_angle_velocity)
-
-        return
 
     def post_decision(self):
         pass
 
+    def heuristic(self, a, b):
+        """Função heurística (distância euclidiana)"""
+        return ((a[0] - b[0])**2 + (a[1] - b[1])**2)**0.5
 
-    
-
-    def heuristic(self,a, b):
+    def a_star(self, start, goal, opponent_position):
         """
-        Função heurística para estimar a distância de a até b (usando a distância de Manhattan).
-        """
-        return abs(a[0] - b[0]) + abs(a[1] - b[1])
-
-    def a_star(self,start, goal, obstacles):
-        """
-        Implementação do algoritmo A* para encontrar o caminho do agente até o alvo.
-
-        Parâmetros:
-        - grid: matriz 2D representando o mapa (0 = espaço livre, 1 = obstáculo).
-        - start: tupla (x, y) com a posição inicial do agente.
-        - goal: tupla (x, y) com a posição do alvo.
-
-        Retorna:
-        - Lista de tuplas com o caminho do agente até o alvo ou None se não houver caminho.
+        Implementação do A* para encontrar o caminho até o objetivo.
         """
         # Movimentos possíveis: cima, baixo, esquerda, direita
         neighbors = [(0, -0.1), (0, 0.1), (-0.1, 0), (0.1, 0)]
 
-        obstacle_positions = [(op.x, op.y) for op in obstacles.values()]
-        print(f'posicao dos obstaculos: {obstacle_positions}')
-        # Fila de prioridade (custo, posição atual)
+        # Inicializa a lista de prioridades e os scores
         open_set = []
         heapq.heappush(open_set, (0, start))
-
-        # Dicionário para rastrear os menores custos até um nó
         g_score = {start: 0}
-
-        # Dicionário para rastrear o caminho
         came_from = {}
-
+        print(1)
         while open_set:
-            # Nó com menor custo estimado
             _, current = heapq.heappop(open_set)
-
-            # Verifica se atingimos o objetivo
-            if current == goal:
+            print(2)
+            # Verifica se o objetivo foi alcançado
+            if self.is_goal_reached(current, goal):
                 path = []
                 while current in came_from:
                     path.append(current)
                     current = came_from[current]
                 path.append(start)
+                print(f'posição inicial: {self.pos} Caminho encontrado: {path[::-1]}, objetivo: {goal}')
                 return path[::-1]  # Retorna o caminho na ordem correta
-
+            
             # Explora os vizinhos
             for dx, dy in neighbors:
                 neighbor = (current[0] + dx, current[1] + dy)
-
-                # Verifica se o vizinho não está nos obstáculos
-                if neighbor not in obstacle_positions:
-                    # Calcula o custo para alcançar o vizinho
+                print(3)
+                # Verifica se o vizinho está livre de obstáculos
+                if not self.is_near_opponent(neighbor, opponent_position):
                     tentative_g_score = g_score[current] + 1
-
-                    # Se o caminho atual for melhor, atualiza
+                    print(4)
                     if neighbor not in g_score or tentative_g_score < g_score[neighbor]:
+                        print(5)
                         g_score[neighbor] = tentative_g_score
                         priority = tentative_g_score + self.heuristic(neighbor, goal)
                         heapq.heappush(open_set, (priority, neighbor))
                         came_from[neighbor] = current
 
-        return None  # Retorna None se não houver caminho
+        return None  # Retorna None se nenhum caminho for encontrado
 
-    def detect_obstacles(self):
-        # Método para determinar se há obstáculos no caminho
-        # Exemplo: verificar proximidade de oponentes
-        return any(self.is_near_opponent(op) for op in self.opponents)
-    
-    def is_near_opponent(self, opponent):
-        # Método para verificar se um oponente está próximo
-        print(f'posicao do robo {self.pos}')
-        
-        
-        distance = ((self.pos[0] - self.opponents[opponent].x)**2 + (self.pos[1] - self.opponents[opponent].y)**2)**0.5
-        print(f'distancia relativa ao obstaculo {opponent} : {distance}')
-        return distance < 0.25  # Ajuste o raio conforme necessário
+    def is_near_opponent(self, point, opponent_position, max_distance=0.20):
+        """
+        Verifica se a posição 'point' está próxima a algum obstáculo.
 
-    def get_obstacle_positions(self):
-        # Retorna posições dos obstáculos (oponentes)
-        return [op.pos for op in self.opponents]
+        Parâmetros:
+        - point: tupla (x, y) com a posição do ponto a ser verificado.
+        - opponent_position: lista de posições (x, y) dos obstáculos.
+        - max_distance: distância máxima para considerar um obstáculo.
+
+        Retorna:
+        - True se a posição 'point' estiver a uma distância menor que max_distance de algum obstáculo.
+        - False caso contrário.
+        """
+        for opponent in opponent_position:
+            distance = ((point[0] - opponent[0])**2 + (point[1] - opponent[1])**2)**0.5
+            if distance < max_distance:
+                return True  # Obstáculo próximo
+        return False  # Nenhum obstáculo próximo
+
+    def is_goal_reached(self, current, goal, tolerance=0.15):
+        """
+        Verifica se o ponto atual está próximo o suficiente do objetivo.
+
+        Parâmetros:
+        - current: ponto atual como tupla (x, y).
+        - goal: ponto objetivo como tupla (x, y).
+        - tolerance: tolerância para considerar que o objetivo foi alcançado.
+
+        Retorna:
+        - True se o ponto atual estiver dentro da tolerância do objetivo.
+        - False caso contrário.
+        """
+        return abs(current[0] - goal[0]) < tolerance and abs(current[1] - goal[1]) < tolerance

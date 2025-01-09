@@ -34,6 +34,8 @@ class SSLExampleEnv(SSLBaseEnv):
         self.all_points = FixedQueue(max(4, self.max_targets))
         self.robots_paths = [FixedQueue(40) for i in range(11)]
 
+        
+
         self.rounds = self.max_rounds  ## because of the first round
         self.targets_per_round = 1
 
@@ -60,6 +62,8 @@ class SSLExampleEnv(SSLBaseEnv):
         # Visible path drawing control
         for i in self.my_agents:
             self.robots_paths[i].push(Point(self.frame.robots_blue[i].x, self.frame.robots_blue[i].y))
+
+        
 
         # Check if the robot is close to the target
         for j in range(len(self.targets) - 1, -1, -1):
@@ -184,11 +188,15 @@ class SSLExampleEnv(SSLBaseEnv):
         
         for i in range(len(self.robots_paths)):
             if len(self.robots_paths[i]) > 1:
+                
                 my_path = [pos_transform(*p) for p in self.robots_paths[i]]
+                
                 pygame.draw.lines(self.window_surface, (255, 0, 0), False, my_path, 1)
+        
+        
 
     def draw_target(self, screen, transformer, point, color):
         x, y = transformer(point.x, point.y)
-       #print('test')
+       
         size = 0.09 * self.field_renderer.scale
         pygame.draw.circle(screen, color, (x, y), size, 2)

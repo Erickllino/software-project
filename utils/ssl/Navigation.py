@@ -69,3 +69,13 @@ class Navigation:
       return target_velocity, -kp * d_theta
     else:
       return Point(0.0, 0.0), -kp * d_theta
+    
+
+  @staticmethod
+  def Astar(robot:Robot , start, target: Point, obstacles): 
+    target = Point(target.x * M_TO_MM, target.y * M_TO_MM)
+    robot_position = Point(robot.x * M_TO_MM, robot.y * M_TO_MM)
+    obstacles = {id: Point(robot.x * M_TO_MM, robot.y * M_TO_MM) for id, robot in obstacles.items()}
+
+
+    
