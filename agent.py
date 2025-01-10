@@ -7,43 +7,81 @@ class ExampleAgent(BaseAgent):
 
     def __init__(self, id=0, yellow=False):
         super().__init__(id, yellow)
+        self.targets_atuais = []
+        self.path = None
+        self.temp_target = None
+        self.i = 0
 
     def decision(self):
         # Verifica se existem alvos
         if len(self.targets) == 0:
             return
 
+        
         # Obtém posições dos oponentes
         opponent_position = [(op.x, op.y) for op in self.opponents.values()]
 
         # Verifica se há obstáculos perto da posição atual
         obs = self.is_near_opponent(self.pos, opponent_position, max_distance=0.25)
 
-        if not obs:  # Se não houver obstáculos
-            # Move diretamente ao alvo
+        if self.targets_atuais != self.targets:  # Se não houver obstáculos
+            self.targets_atuais = self.targets
+            '''# Move diretamente ao alvo
             target_velocity, target_angle_velocity = Navigation.goToPoint(self.robot, self.targets[0])
-        else:
+            else:'''
             # Usa A* para encontrar um caminho
             start = (self.robot.x, self.robot.y)
             goal = (self.targets[0].x, self.targets[0].y)
-            print('Antes de bater no algo')
-            path = self.a_star(start, goal, opponent_position)
+            
+            self.path = self.a_star(start, goal, opponent_position)
+            self.i = 0
+        else:
+            if self.path is not None:
+                
+                if self.i == len(self.path) - 1:
+                        self.i = 0
+                        self.path = None
+                        self.temp_target = None
+                        return
+                else:   
+                    point = self.path[self.i]
+                    
+                self.temp_target = Point(point[0], point[1])
 
-            if path is not None:
-                for point in path:
-                    # Move o robô ponto a ponto no caminho
-                    target_velocity, target_angle_velocity = Navigation.goToPoint(self.robot, Point(point[0], point[1]))
-                    self.set_vel(target_velocity)
-                    self.set_angle_vel(target_angle_velocity)
+
+
+                
+                print(f'-----------------------------\nindo para {point}')
+
+                target_velocity, target_angle_velocity = Navigation.goToPoint(self.robot, self.temp_target)
+                
+                self.set_vel(target_velocity)
+                self.set_angle_vel(target_angle_velocity)
+
+                print(f'\nheuristica: {self.heuristic(self.temp_target ,self.pos)}\n')
+
+                if self.heuristic(self.temp_target ,self.pos) >= 0.05:
+                    print(f'posição atual: {self.pos}, ponto atual: {point}\n--------------------')
+                    self.temp_target = point
+                    return
+                if self.heuristic(self.temp_target ,self.pos) < 0.05:
+                    print(f'i : {self.i}')
+                    self.i += 1
+                    return
+                
+                
+                    
             else:
                 # Caso não exista caminho, para o robô
-                self.set_vel(0)
-                self.set_angle_vel(0)
+                print('Ta so ido reto')
+                target_velocity, target_angle_velocity = Navigation.goToPoint(self.robot, self.targets[0])
+                self.set_vel(target_velocity)
+                self.set_angle_vel(target_angle_velocity)
                 return
 
-        # Define a velocidade final
-        self.set_vel(target_velocity)
-        self.set_angle_vel(target_angle_velocity)
+            '''# Define a velocidade final
+            self.set_vel(target_velocity)
+            self.set_angle_vel(target_angle_velocity)'''
 
     def post_decision(self):
         pass
@@ -57,17 +95,17 @@ class ExampleAgent(BaseAgent):
         Implementação do A* para encontrar o caminho até o objetivo.
         """
         # Movimentos possíveis: cima, baixo, esquerda, direita
-        neighbors = [(0, -0.1), (0, 0.1), (-0.1, 0), (0.1, 0)]
+        neighbors = [(0, -0.09), (0, 0.09), (-0.09, 0), (0.09, 0)]
 
         # Inicializa a lista de prioridades e os scores
         open_set = []
         heapq.heappush(open_set, (0, start))
         g_score = {start: 0}
         came_from = {}
-        print(1)
+        
         while open_set:
             _, current = heapq.heappop(open_set)
-            print(2)
+            
             # Verifica se o objetivo foi alcançado
             if self.is_goal_reached(current, goal):
                 path = []
@@ -75,19 +113,19 @@ class ExampleAgent(BaseAgent):
                     path.append(current)
                     current = came_from[current]
                 path.append(start)
-                print(f'posição inicial: {self.pos} Caminho encontrado: {path[::-1]}, objetivo: {goal}')
+                
                 return path[::-1]  # Retorna o caminho na ordem correta
             
             # Explora os vizinhos
             for dx, dy in neighbors:
                 neighbor = (current[0] + dx, current[1] + dy)
-                print(3)
+                
                 # Verifica se o vizinho está livre de obstáculos
                 if not self.is_near_opponent(neighbor, opponent_position):
                     tentative_g_score = g_score[current] + 1
-                    print(4)
+                    
                     if neighbor not in g_score or tentative_g_score < g_score[neighbor]:
-                        print(5)
+                        
                         g_score[neighbor] = tentative_g_score
                         priority = tentative_g_score + self.heuristic(neighbor, goal)
                         heapq.heappush(open_set, (priority, neighbor))
@@ -95,7 +133,7 @@ class ExampleAgent(BaseAgent):
 
         return None  # Retorna None se nenhum caminho for encontrado
 
-    def is_near_opponent(self, point, opponent_position, max_distance=0.20):
+    def is_near_opponent(self, point, opponent_position, max_distance=0.18):
         """
         Verifica se a posição 'point' está próxima a algum obstáculo.
 
@@ -114,7 +152,7 @@ class ExampleAgent(BaseAgent):
                 return True  # Obstáculo próximo
         return False  # Nenhum obstáculo próximo
 
-    def is_goal_reached(self, current, goal, tolerance=0.15):
+    def is_goal_reached(self, current, goal, tolerance=0.1):
         """
         Verifica se o ponto atual está próximo o suficiente do objetivo.
 
