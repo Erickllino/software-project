@@ -79,3 +79,38 @@ Agora ele está fazendo o caminho guardado, mas preciso que ele va para cada pon
 ITS ALIVEEEEEE
 funciona, mas esta muito lento, verei o que fazer: talvez veja aquele negocio de mice maze la
 
+
+
+10/01
+
+Encontrei 2 problemas na 1a fase: 
+    Problema 1; a distancia pra cada ponto esta muito pequena oque faz o agente caminhar muito lento
+    Problema 2; em diagonais ele esta andando em zigzag oque reduz a eficiencia do caminho
+
+Ja na 2a fase:
+    Penso em fazer atualizaçoes no caminho periodicamente
+
+
+Vou tirar o dia para descanso, resolvo amanha
+
+
+11/01
+
+Tive algumas ideias de como resolver
+
+Primeira fase
+Problema 1 - tentar resumir o caminho, ou seja, criar retas que seguem o caminho relativamente bem
+Problema 2 - A solução de 'resumir' funciona para isso, pois
+
+Adicionei a função resumir_caminho para tentar essa estrategia, a ideia é usar a formula de algebra linear para checar se 3 pontos sao colineares
+e se forem, resume os pontos em um. Funciona, mas nao para diagonais, para resolver isso adicionei mais possiveis movimentos para  o algoritimo A*
+para que ele se movesse em diagonais direto
+
+Segunda fase
+Adicionei uma atualização a cada 2 segundos
+e tambem uma atualização quando os oponentes chegam perto, 
+
+
+Ler mais sobre o micromouse --> problema de resolução de labirinto, pode ajudar na navegação
+Ver videos do MatLab sobre navegação --> https://www.youtube.com/watch?v=QR3U1dgc5RE&t=375s
+Esse video pode ajudar em tracking de objetos dinamicos (fase 2) --> https://www.youtube.com/watch?v=jbfpwpqVDI8&t=140s

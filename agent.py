@@ -2,6 +2,7 @@ import heapq
 from utils.ssl.Navigation import Navigation
 from utils.ssl.base_agent import BaseAgent
 from utils.Point import Point
+import time
 
 class ExampleAgent(BaseAgent):
 
@@ -11,6 +12,8 @@ class ExampleAgent(BaseAgent):
         self.path = None
         self.temp_target = None
         self.i = 0
+        self.last_path_update = time.time()
+        self.min_dist = 0.25
 
     def decision(self):
         # Verifica se existem alvos
@@ -21,20 +24,27 @@ class ExampleAgent(BaseAgent):
         # Obtém posições dos oponentes
         opponent_position = [(op.x, op.y) for op in self.opponents.values()]
 
-        # Verifica se há obstáculos perto da posição atual
-        obs = self.is_near_opponent(self.pos, opponent_position, max_distance=0.25)
+        obs = self.is_near_opponent(self.pos, opponent_position, max_distance=self.min_dist)
+        
+        current_time = time.time()
 
-        if self.targets_atuais != self.targets:  # Se não houver obstáculos
+        
+
+        if self.targets_atuais != self.targets or current_time - self.last_path_update>=2:  # Se os alvos nao forem os mesmos ou passou 3 segundos
             self.targets_atuais = self.targets
-            '''# Move diretamente ao alvo
-            target_velocity, target_angle_velocity = Navigation.goToPoint(self.robot, self.targets[0])
-            else:'''
+            
             # Usa A* para encontrar um caminho
             start = (self.robot.x, self.robot.y)
             goal = (self.targets[0].x, self.targets[0].y)
             
             self.path = self.a_star(start, goal, opponent_position)
             self.i = 0
+            self.last_path_update = current_time
+            self.min_dist = 0.25
+            
+
+
+            
         else:
             if self.path is not None:
                 
@@ -51,21 +61,21 @@ class ExampleAgent(BaseAgent):
 
 
                 
-                print(f'-----------------------------\nindo para {point}')
+                
 
                 target_velocity, target_angle_velocity = Navigation.goToPoint(self.robot, self.temp_target)
                 
                 self.set_vel(target_velocity)
                 self.set_angle_vel(target_angle_velocity)
 
-                print(f'\nheuristica: {self.heuristic(self.temp_target ,self.pos)}\n')
+                
 
                 if self.heuristic(self.temp_target ,self.pos) >= 0.05:
-                    print(f'posição atual: {self.pos}, ponto atual: {point}\n--------------------')
+                    
                     self.temp_target = point
                     return
                 if self.heuristic(self.temp_target ,self.pos) < 0.05:
-                    print(f'i : {self.i}')
+                    
                     self.i += 1
                     return
                 
@@ -89,13 +99,39 @@ class ExampleAgent(BaseAgent):
     def heuristic(self, a, b):
         """Função heurística (distância euclidiana)"""
         return ((a[0] - b[0])**2 + (a[1] - b[1])**2)**0.5
+    
+    def resumir_caminho(self,caminho):
+        if len(caminho) < 3:
+            return caminho  # Se tiver menos de 3 pontos, não dá para simplificar.
 
+        # Inicializar lista de pontos resumidos
+        caminho_resumido = [caminho[0]]  # Começa com o primeiro ponto
+
+        # Função para verificar se 3 pontos são colineares
+        def sao_colineares(p1, p2, p3):
+            # Determinante para verificar colinearidade
+            # | x1 y1 1 |
+            # | x2 y2 1 | = 0 indica colinearidade
+            # | x3 y3 1 |
+            return (p2[0] - p1[0]) * (p3[1] - p1[1]) == (p3[0] - p1[0]) * (p2[1] - p1[1])
+
+        # Verificar colinearidade ao longo do caminho
+        for i in range(1, len(caminho) - 1):
+            if not sao_colineares(caminho[i - 1], caminho[i], caminho[i + 1]):
+                caminho_resumido.append(caminho[i])
+
+        # Adicionar o último ponto
+        caminho_resumido.append(caminho[-1])
+
+        return caminho_resumido
+    
     def a_star(self, start, goal, opponent_position):
         """
         Implementação do A* para encontrar o caminho até o objetivo.
         """
         # Movimentos possíveis: cima, baixo, esquerda, direita
-        neighbors = [(0, -0.09), (0, 0.09), (-0.09, 0), (0.09, 0)]
+        n = 0.09
+        neighbors = [(0, -n), (0, n), (-n, 0), (n, 0), (-n, -n), (-n, n), (n, -n), (n, n)]
 
         # Inicializa a lista de prioridades e os scores
         open_set = []
@@ -114,14 +150,14 @@ class ExampleAgent(BaseAgent):
                     current = came_from[current]
                 path.append(start)
                 
-                return path[::-1]  # Retorna o caminho na ordem correta
+                return self.resumir_caminho(path[::-1])  # Retorna o caminho na ordem correta
             
             # Explora os vizinhos
             for dx, dy in neighbors:
                 neighbor = (current[0] + dx, current[1] + dy)
                 
                 # Verifica se o vizinho está livre de obstáculos
-                if not self.is_near_opponent(neighbor, opponent_position):
+                if not self.is_near_opponent(neighbor, opponent_position) or self.is_goal_reached(neighbor, goal):
                     tentative_g_score = g_score[current] + 1
                     
                     if neighbor not in g_score or tentative_g_score < g_score[neighbor]:
@@ -133,7 +169,7 @@ class ExampleAgent(BaseAgent):
 
         return None  # Retorna None se nenhum caminho for encontrado
 
-    def is_near_opponent(self, point, opponent_position, max_distance=0.18):
+    def is_near_opponent(self, point, opponent_position, max_distance=0.25):
         """
         Verifica se a posição 'point' está próxima a algum obstáculo.
 
