@@ -1,28 +1,35 @@
-1a Dificuldade  - trabalhar com o github --> dar fork no repositório
+06/01
 
-2a              - Baixar os requisitos, provavelmente dando problema devido a partição da minha maquina
+Recebi o proojeto hoje, tive alguns probleas com o github, em como dar fork no repositório, tenho poouca experiencia com isso. Precisei ver um tutorial de github para
+entender oque fazer, aproveitei e estudei uu pouco de versionamentoo, será util no futuro
+
+
+Tive alguns problemas ao Baixar os requisitos, provavelmente dando problema devido à alocação de espaço da partição do linux a minha maquina:
 
 pip._vendor.urllib3.exceptions.ProtocolError: ("Connection broken: OSError(28, 'No space left on device')", OSError(28, 'No space left on device'))
 
 Tive problemas para organização do espaço para o trabalho, solução --> criei um ambinte virtual conda na pasta do projeto, nao tem espaço no anaconda do linux em si
-
-3a              - Dificuldade com a utilização do linux, devido a falta de intimidade com o OS
-
+Fazer isso foi um desafio em si, fiz o dual boot no meu computador no final do ano passado, mas ainda falta experiencia com o OS do Linux
 
 
 
-Tendo o projeto funcionando em maos, agora penso em como resolver esses problemas:
-Dificuldade 1 --> Parece, de fato, o mais facil. O agente somente deve se movimentar afim de desviar de cada obstaculo
-Dificuldade 2 --> Os obstaculos se movem, oque pode dificultar o algoritmo para como o 
-Dificuldade 3 --> Aqui tem-se multiplos agentes, mas eles estao todos indo para o mesmo objetivo, a optimização desse movimento pode vim a partir da separaçao de
+
+Tendo o projeto funcionando em maos, agora penso em como resolver esses problemas, o projeto é dividido em '4 dificuldades', que chamarei de 4 fases, tirei a seguinte
+conclusão a partir da minha observação de cada fase:
+
+Fase 1 --> Parece, de fato, o mais facil. O agente somente deve se movimentar afim de desviar de cada obstaculo
+
+Fase 2 --> Os obstaculos se movem, oque pode dificultar como o algoritimo calcula a rota
+
+Fase 3 --> Aqui tem-se multiplos agentes, mas eles estao todos indo para o mesmo objetivo, a optimização desse movimento pode vim a partir da separaçao de
 qual agente vai para qual objetivo
 
-Dificuldade 4 --> Aqui tem-se multiplos agentes, como na Dificuldade 3, entretanto, aqui se tem menos objetivos. provavelmente deve-se deixar os agentes mais distantes
+Fase 4 --> Aqui tem-se multiplos agentes, como na Dificuldade 3, entretanto, aqui se tem menos objetivos. provavelmente deve-se deixar os agentes mais distantes
 dos objetivo em posiçoes estratetigicas, para que esses fiquem mais proximos dos objetivos
 
+07/01
 
-
-           ## Dificuldade 1 
+Começando pela
 
 Lendo os arquivo, fico em duvida em como eu começo, minha ideia inicial é passar a distancia relativa do player e todos os obstaculos e se ele ficarem à uma distancia
 a se colidirem, altero o trajeto aplicando algum algoritimo de procura (talvez depth first search)
@@ -114,3 +121,58 @@ e tambem uma atualização quando os oponentes chegam perto,
 Ler mais sobre o micromouse --> problema de resolução de labirinto, pode ajudar na navegação
 Ver videos do MatLab sobre navegação --> https://www.youtube.com/watch?v=QR3U1dgc5RE&t=375s
 Esse video pode ajudar em tracking de objetos dinamicos (fase 2) --> https://www.youtube.com/watch?v=jbfpwpqVDI8&t=140s
+
+12/01-
+
+Mexi um pouco na parte e escalagem (multiplos agentes), pparece que será mais dificil que eu pensei, preciso colocar dicionarios para tudo
+
+13/01- 1 parte de uma viagem de 13h de carro
+
+14/01- 2 parte de uma viagem de 13h de carro
+
+
+15/01-
+
+Aplicando para multiplos agentes e melhoraando leitura do codigo-
+
+16/01-
+
+Hoje é o aniversario do meu irmao, darei um dia de descanso para coomemorar com ele
+
+17/01 - 
+
+Organizei esse documento para a entrega parcial que ocorre hoje e tambem passei muito tempo continuando a organizar o codigo para multiplos agentes
+eu nao tinha escrito o codigo inicialmente para grande escala, oque pode ter me fodido, agora estou lidanddo com meus erros. Irei passar um bom tempo para
+deixar isso funcionall
+
+Acho que fiquei mais de 8h pra fazer meu coddigo ser escalavel, consegui colocar todos os dados dos alvo emm um dicionario, agora preciso debugar para multiplos agentes
+e tambem para multipllos alvos de um agente
+
+
+18/01
+
+Finalmente esta organizado,terminei de deixar possivel para multiplo agentes. O projeto esta quase pronto, agora falta:
+
+    -- Aprimorar a velocidade de transito do agente
+    -- Saber como atualizar o caminho de maneira eficiente
+    -- 
+
+19/01?
+
+Descanso
+
+20/01
+Projeto de estatistica e redes neurais
+
+21/01 -
+
+Descobri um poblema, se o alvo estiver exatamente encima de um obstaculo, ele trava. Nao tenho ideia de como resolver isso
+- Mexi nas tolerancias e deu uma melhorada, ainda ocorre, mas raramente
+
+Estava com problemas para aprimorar a velocidaed do transito do agente, fiz algumas pesquisas e
+descobri o algoritimo douglas Peucker, ele tem como intuito suavizar curvas de um grafico.
+Na pagina da wikipedia tem o codigo base de como implemmentar isso : https://en.wikipedia.org/wiki/Ramer%E2%80%93Douglas%E2%80%93Peucker_algorithm
+
+
+Resolvi o caso em que os agentes ficam parados esperando ter um alvo, coloquei para os agentes sem alvos irem para o mais proximo
+Tudo que falta são os objetos dinamicos, acredito que sera dificil. Infelizmmente nos proximos 2 dias irei focar em projetos e 2 outras cadeiras, mas voltarei dps

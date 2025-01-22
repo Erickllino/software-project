@@ -191,7 +191,7 @@ class SSLExampleEnv(SSLBaseEnv):
                 
                 my_path = [pos_transform(*p) for p in self.robots_paths[i]]
                 
-                pygame.draw.lines(self.window_surface, (255, 0, 0), False, my_path, 1)
+                pygame.draw.lines(self.window_surface, (255, 255, 0), False, my_path, 1)
         
         
 
