@@ -176,3 +176,12 @@ Na pagina da wikipedia tem o codigo base de como implemmentar isso : https://en.
 
 Resolvi o caso em que os agentes ficam parados esperando ter um alvo, coloquei para os agentes sem alvos irem para o mais proximo
 Tudo que falta são os objetos dinamicos, acredito que sera dificil. Infelizmmente nos proximos 2 dias irei focar em projetos e 2 outras cadeiras, mas voltarei dps
+
+22/01 | 23/01
+
+Outros trabalhos
+
+
+24/01
+
+Trabalhei no problema de desviar de objetos em movimento. Criei a função check_col, a ideia é checar a distancia um pouco a frente do agente ativo
